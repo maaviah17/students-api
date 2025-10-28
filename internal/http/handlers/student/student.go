@@ -3,6 +3,7 @@ package student
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -14,15 +15,19 @@ import (
 func New() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request){
 
+		slog.Info("creating a student")
 		var newStudent types.Student
 
 		//whatever data that is coming in will be json decoded and stored in the struct.
 		err := json.NewDecoder(r.Body).Decode(&newStudent)
 		if errors.Is(err, io.EOF) {
-			response.WriteJson(w, http.StatusBadRequest, err.Error())
+			response.WriteJson(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("empty bodyy aaayi hai :(( ))")))
 			return 
 		}
-		slog.Info("creating a student")
+
+		if err != nil {
+			response.WriteJson(w, http.StatusBadRequest, response.GeneralError(err))
+		}
 
 		response.WriteJson(w, http.StatusCreated, map[string]string {"success":"OK"})
 	} 
